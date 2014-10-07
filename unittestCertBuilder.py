@@ -181,9 +181,7 @@ class testCertFunctions(unittest.TestCase):
 		sftp.close()
 
 		self.assertTrue(scpSuccess)
-	def test_eapCfg(self):
-		
-		self.assertTrue(False)
+
 
 if __name__ == '__main__':
 	unittest.main()

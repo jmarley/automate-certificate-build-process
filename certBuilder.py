@@ -188,6 +188,7 @@ class certBuilder:
 				
 				logger.write("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 				logger.write("Secure copying keystore\n")
+				logger.write("File: " + scpFile)
 				
 				try:
 					# instantiate host server as transport
@@ -197,12 +198,13 @@ class certBuilder:
 					# make connection
 					sftp = paramiko.SFTPClient.from_transport(transport)
 					
-					sftp.put(self.keystore,scpFile,confirm=False)
+					sftp.put(self.keystore,scpFile,confirm=False)			
 					
 				except IOError:
 					print("couldn't sucessfully make a connection, please verify params")
+
 				logger.write('\n****Keystore successfully remote copied****\n')	
 				logger.write("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+
 		except IOError:
 			print('There is an issue with secure copying file, please verify')
-
