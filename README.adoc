@@ -1,0 +1,79 @@
+= Automate keystore creation process
+:icons: font
+:source-hightlighter: pygments
+
+
+This is very simple script that basically leverages java's *keytool* command to generate keystore and creates certificate signing request that can then be given to a CA in order to get the signed certificate.
+
+The reason why I decided to write a script for this is because a client that I'm working on asked me to create +90 keystores and the process to-date was manual which involved copy, paste, ftp, copy, paste, etc. and not to mention my client continually is creating new VM's and has to this process on an ongoing basis.
+
+I hope that this will help any sys admins that want to automate this type of process.
+
+== How it works
+
+Typically required options are meant to be kept to a minimum with a cli tool, but seeing as how I had some strict requirements as far as setting up the keystores I needed to make all the options (minus file or file and no others) required to get the desired output.
+
+.Basics
+
+For our use case we had serveral parameters that are needed. Now your use case may be completely different wrt to Auth codes, but will be easily customizable. 
+
+Host Server::
+The host server really isn't needed for this to be automated, but it how we are creating our keystores, which provides a nice way to differenciate a slew of keystores.
+Reference Code::
+This is needed as part of our requirements for generating the certificate via CA
+Authorization Code::
+This is also needed as part of our process for generating the certificate via CA
+Environment:: 
+There are only two environments for use: prod or dev
+Alias::
+This is the alias for the keystore that you're going to create
+File::
+This is used in lieu of the other options
+
+.Single keystore
+
+Below I show an example of to use this cli command to create a single keystore
+
+Example::
+[source,bash]
+----
+$ buildCerts \
+--server=my.domain.com \
+--referencecode=1234569 \
+--authcode=abcdefgh1234 \
+--directory=/home/myprofile/certs
+--environment=dev
+--alias=myalias
+----
+
+
+.Multiple keystore
+
+For creating multiple keystores you probably don't want to enter the above command a bunch of times, so to automate this you can create a text file with the parameters above entered with space between each option and a new line seperating entry.
+
+Example::
+
+myInputFile:::
++
+----
+my.domain.com   1234569   abcdefgh1234 /home/myprofile/my.domain   dev  myalias
+your.domain.com 987456123 jklmnopqrs11 /home/myprofile/your.domain prod youralias
+----
++
+Execute:::
++
+[source,bash]
+----
+$ buildCerts --filename=myInputFile
+---- 
++ 
+Output:::
+[source,bash]
+----
+$ tree
+
+---- 
+
+
+== What I didn't do and what you could do
+
