@@ -21,15 +21,15 @@ class certBuilder:
 		self.hostPasswd = hostPasswd
 
 		if 'prod' in self.env:
-			rootcafile = '/opt/app/ProjectCerts/us_treas_ca.cer'
+			rootcafile = '/<dir-to-file>/ca.cer'
                 else:
-			rootcafile = '/opt/app/ProjectCerts/us_treas_ca_dev.cer'
-			ociocafile = '/opt/app/ProjectCerts/ocio_ca_dev.cer'
+			rootcafile = '/<dir-to-file>/ca.cer'
+			othercafile = '/<dir-to-file>/ca.cer'
 			
 		# set keystore create cmd
 		self.keystoreCmd = ("keytool -genkeypair -v -alias " + self.alias 
 			+ " -keyalg RSA  -keysize 2048 -dname " + "'" + "cn=" 
-			+ self.host + ",ou=Devices, ou=Internal Revenue Service, ou=Department of the Treasury,o=U.S. Government,c=US" 
+			+ self.host + ",ou=, ou=, ou=,o=,c=" 
 			+ "'"  + " -keypass " + self.passwd + " -keystore " 
 			+ self.keystore + " -storepass " + self.passwd)
 
@@ -46,9 +46,9 @@ class certBuilder:
 			+ " -noprompt")
 
 		# set import root ca certificate cmd
-		self.importOcioCaCmd = ("keytool -importcert -trustcacerts -keypass " 
+		self.importOtherCaCmd = ("keytool -importcert -trustcacerts -keypass " 
 			+ self.passwd + " -keystore " + self.keystore + " -storepass " 
-			+ self.passwd + " -alias ocio_ca -file " + ociocafile 
+			+ self.passwd + " -alias other_ca -file " + othercafile 
 			+ " -noprompt")
 		
 		# set import signed certificate from ca cmd
@@ -134,11 +134,11 @@ class certBuilder:
 				if p == 1:
 					logger.write('\n****ERROR****\nfailure to import root ca cert(s)\n')
 		
-				# import ocio ca to keystore
-				p = subprocess.call(self.importOcioCaCmd, shell=True)
+				# import other ca to keystore
+				p = subprocess.call(self.importOtherCaCmd, shell=True)
 			
 				if p == 1:
-					logger.write('\n****ERROR****\nfailure to import ocio ca cert(s)\n')
+					logger.write('\n****ERROR****\nfailure to import other ca cert(s)\n')
 			
 				# import ca signed cert to keystore
 				p = subprocess.call(self.importCerCmd, shell=True)
@@ -168,7 +168,7 @@ class certBuilder:
 	                        logger.write("\n\nExport CSR CMD\n")
 	                        logger.write(self.csrCmd)
 	                        logger.write("\n\nOcio cert import CMD\n")
-	                        logger.write(self.importOcioCaCmd)
+	                        logger.write(self.importOtherCaCmd)
 	                        logger.write("\n\nRoot cert import CMD\n")
 	                        logger.write(self.importRootCaCmd)
 	                        logger.write("\n\nImport signed cert CMD\n")
