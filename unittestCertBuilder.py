@@ -183,5 +183,54 @@ class testCertFunctions(unittest.TestCase):
 		self.assertTrue(scpSuccess)
 
 
+	def test_configVault():
+		
+                # create keystore
+                self.cert.createKeystore()
+
+                # get server connection info
+                self.cert.host = raw_input('enter test server ip: ')
+                self.cert.hostUser = raw_input('server user name: ')
+                self.cert.hostPasswd = getpass.getpass()
+
+                # secure copy keystore
+                self.cert.scpKeystore()
+
+                # directory keystore copied to
+                wdir = '/opt/app/SSL/'
+                keystore = self.cert.host + '.keystore'
+
+                # instantiate up transport object
+                transport = paramiko.Transport(self.cert.host)
+
+                # add connection params
+                transport.connect(username=self.cert.hostUser,password=self.cert.hostPasswd)
+
+                # make connection
+                sftp= paramiko.SFTPClient.from_transport(transport)
+
+                # list directory contnents
+                listDir = sftp.listdir(wdir)
+
+                # does keystore exist
+                scpSuccess = self.cert.host + '.keystore' in listDir
+
+		# create vault keystore
+		
+		# create vault
+
+		# add server keystore password
+
+		# test was added correctly
+
+                # remove added remote file
+                if scpSuccess:
+                        sftp.remove(wdir + keystore)
+
+                sftp.close()
+
+                self.assertTrue(scpSuccess)
+	
+		
 if __name__ == '__main__':
 	unittest.main()

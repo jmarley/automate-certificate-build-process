@@ -208,3 +208,6 @@ class certBuilder:
 
 		except IOError:
 			print('There is an issue with secure copying file, please verify')
+
+	def vaultKeystore():
+#	def configEAP(self):
