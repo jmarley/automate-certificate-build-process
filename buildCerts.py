@@ -84,8 +84,13 @@ def main():
 		elif options.installks:
 
 			keystore.scpKeystore()
+<<<<<<< HEAD
 			keystore.configVault()
 			keystore.confgEap()
+=======
+			keystore.vaultKeystore()
+			keystore.confgEAP()
+>>>>>>> installks
 		else:
 
 			print('please either add the option to create or import')
