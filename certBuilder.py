@@ -14,11 +14,16 @@ class certBuilder:
 		self.keystore = dir + '/' + self.host + '.keystore' 
 		self.logfile = dir + '/' + self.host  + '.log'
 		self.csrfile = dir + '/' + self.host + '.csr'
-		cerfile = dir + '/' + self.host + '.cer'
+		self.eapHome = '/opt/app/jboss/jboss-eap-6.1/'
 		self.alias = alias
 		self.passwd = keystorePass
 		self.hostUser = hostUser
 		self.hostPasswd = hostPasswd
+
+		# directory we're going to write keystore to
+		self.ksLoc = '/opt/app/SSL/' + self.host + '.keystore'
+
+		cerfile = dir + '/' + self.host + '.cer'
 
 		if 'prod' in self.env:
 			rootcafile = '/<dir-to-file>/ca.cer'
@@ -181,14 +186,12 @@ class certBuilder:
 
 		try:
 
-			# directory we're going to write keystore to
-			scpFile = '/opt/app/SSL/' + self.host + '.keystore'
 
 			with open(self.logfile, 'a') as logger:
 				
 				logger.write("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
 				logger.write("Secure copying keystore\n")
-				logger.write("File: " + scpFile)
+				logger.write("File: " + self.ksLoc)
 				
 				try:
 					# instantiate host server as transport
@@ -198,8 +201,10 @@ class certBuilder:
 					# make connection
 					sftp = paramiko.SFTPClient.from_transport(transport)
 					
-					sftp.put(self.keystore,scpFile,confirm=False)			
+					sftp.put(self.keystore,self.ksLoc,confirm=False)			
 					
+					sftp.close()
+
 				except IOError:
 					print("couldn't sucessfully make a connection, please verify params")
 
@@ -209,5 +214,27 @@ class certBuilder:
 		except IOError:
 			print('There is an issue with secure copying file, please verify')
 
-#	def configEAP(self):
-		
+	def logEapCfg(self):
+
+		try:
+			eapCertCfg = (self.eapHome + 
+				"bin/jboss-cli.sh  --connect controller=$HOSTNAME:9999 command=" + "'" + 
+				"/subsystem=web/connector=https/ssl=configuration:add(name=https, key-alias=" + 
+				self.alias + ", password=" +'"'+  "${VAULT::vb::cert::1}" +'"'+ 
+				", certificate-key-file=" +'"'+  self.ksLoc + '"' + 
+				",  cipher-suite=ALL, protocol=TLS)" + "'")
+
+			 with open(self.logfile, 'a') as logger:
+
+                                logger.write("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+                                logger.write("Creating web connector command \n")
+                                logger.write("Jboss CLI command: \n" + eapCertCfg)
+                                logger.write("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+
+                except IOError:
+                        print('There is an issue with secure copying file, please verify')
+
+
+
+
+
