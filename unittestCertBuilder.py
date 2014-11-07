@@ -19,6 +19,8 @@ class testCertFunctions(unittest.TestCase):
 	def setUp(self):
 		
 		testDir = '/home/jmarley/projects/federal/irs/workspace/automate-builtCerts/test'
+		self.jbossDir = '/home/jmarley/applications/jboss/eap/jboss-eap-6.1/'
+		
 		#os.mkdir(testDir)
 		# build test 
 		self.cert = certBuilder.certBuilder('my.example.com',
@@ -80,15 +82,16 @@ class testCertFunctions(unittest.TestCase):
 			" -alias ca -dname cn=ca -storepass passwd -keypass passwd -validity 1 -keysize 1024 -keyalg RSA")
 	
 		p = subprocess.call(caKeystoreCmd,shell=True)
-		if p == 1:
-			print('cakeystorecmd issue')
+
+                self.assertFalse(p, msg='caKeystoreCmd issue: ' + caKeystoreCmd)
 	
 		# export CA cert
 		caExportCerCmd = ("keytool -exportcert -alias ca -keystore " + cajks + " -storepass passwd -file " + cacert)
 	
 		p = subprocess.call(caExportCerCmd,shell=True)	
-		if p == 1:
-			print('caExportCerCmd issue')
+
+		# verify cmd executed correctly	
+                self.assertFalse(p, msg='caExportCerCmd issue: ' + caExportCerCmd)
 
 		# import CA cert into self
 		caImportCaCmd = (" keytool -importcert -keystore " + catrust + 
@@ -96,9 +99,10 @@ class testCertFunctions(unittest.TestCase):
 			cacert + " -noprompt")
 
 		p = subprocess.call(caImportCaCmd,shell=True)
-		if p == 1:
-			print('caImportCaCmd issue')
-				
+		
+		# verify cmd executed correctly	
+		self.assertFalse(p, msg='caImportCaCmd issue: ' + caImportCaCmd)
+
 		# create certificate/keystore
 		self.cert.createKeystore()
 		
@@ -119,8 +123,9 @@ class testCertFunctions(unittest.TestCase):
 		self.cert.importOcioCaCmd = ("echo import OCIO not used ")
 		
 		p = subprocess.call(caCreateCerCmd,shell=True)		
-		if p == 1:
-                        print('caCreateCerCmd issue')
+		
+		# verify cmd executed correctly	
+		self.assertFalse(p, msg='caCreateCerCmd issue: ' + caCreateCerCmd)
 			
 		# import signed cert
 		self.cert.importCER()
@@ -183,7 +188,7 @@ class testCertFunctions(unittest.TestCase):
 		self.assertTrue(scpSuccess)
 
 
-	def test_configVault():
+	def test_configVault(self):
 		
                 # create keystore
                 self.cert.createKeystore()
@@ -216,13 +221,30 @@ class testCertFunctions(unittest.TestCase):
                 scpSuccess = self.cert.host + '.keystore' in listDir
 
 		# create vault keystore
+                vaultKeystoreCmd=("keytool -genkeypair -keystore ./test/vault.jks -alias vault -dname cn=ca -storepass passwd -keypass passwd -validity 1 -keysize 1024 -keyalg RSA")
+
+                p = subprocess.call(vaultKeystoreCmd,shell=True)
+        	
+		# verify cmd executed correctly	
+		self.assertFalse(p, msg='vaultKeystoreCmd issue: ' + vaultKeystoreCmd)
 		
 		# create vault
+	#	createVaultCmd = ( self.jbossDir + "/bin/vault.sh --keystore ./test/vault.jks --keystore-password passwd --alias vault --salt 12457898 --iteration 15 -e ./test -c ")	
+
+         #       p = subprocess.call(createVaultCmd,shell=True)
+
+		# verify cmd executed correctly	
+	#	self.assertFalse(p, msg='createVaultCmd issue: ' + createVaultCmd)
 
 		# add server keystore password
+		vaultKsPassCmd = ( self.jbossDir + "/bin/vault.sh --keystore ./test/vault.jks --keystore-password passwd --alias vault --salt 12457898 --iteration 15 -e ./test -a certpass -x " + self.cert.passwd)
 
-		# test was added correctly
+                p = subprocess.call(vaultKsPassCmd,shell=True)
 
+		# verify cmd executed correctly	
+		self.assertFalse(p, msg='vaultKsPassCmd issue: ' + vaultKsPassCmd)
+
+#		sftp
                 # remove added remote file
                 if scpSuccess:
                         sftp.remove(wdir + keystore)
