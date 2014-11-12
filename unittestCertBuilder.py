@@ -18,9 +18,9 @@ class testCertFunctions(unittest.TestCase):
 
 	def setUp(self):
 		
-		testDir = '/home/jmarley/projects/federal/irs/workspace/automate-builtCerts/test'
+		testDir = '/home/jmarley/test'
 		self.jbossDir = '/home/jmarley/applications/jboss/eap/jboss-eap-6.1/'
-		self.remoteSslDir = '/opt/app/SSL/'		
+		self.remoteSslDir = '/opt/app/'		
 
 		#os.mkdir(testDir)
 		# build test 
